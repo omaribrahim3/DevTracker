@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevTracker - Daily Coding Goals</title>
+    <!-- Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <!-- Header -->
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold text-blue-600">DevTracker</h1>
+            <p class="text-gray-600">Track your daily coding goals and progress.</p>
+            <!-- Dark Mode Toggle -->
+            <button id="darkModeToggle" class="mt-4 px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700">
+                Toggle Dark Mode
+            </button>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Left Column: Goals and Input -->
+            <div class="md:col-span-2 space-y-6">
+                <!-- Motivational Quote Section -->
+                <section id="motivationalQuote" class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-semibold mb-3 text-gray-700">Quote of the Day</h2>
+                    <blockquote class="text-gray-600 italic">
+                        <p id="quoteText">Loading quote...</p>
+                        <footer id="quoteAuthor" class="text-right text-sm mt-2"></footer>
+                    </blockquote>
+                </section>
+
+                <!-- Daily Coding Goals Section -->
+                <section id="dailyGoals" class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-semibold mb-4 text-gray-700">Today's Coding Goals</h2>
+                    <div class="flex mb-4">
+                        <input type="text" id="newGoalInput" class="flex-grow p-2 border border-gray-300 rounded-l-md focus:ring-blue-500 focus:border-blue-500" placeholder="Add a new goal (e.g., Complete Chapter 3)">
+                        <button id="addGoalButton" class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600">Add Goal</button>
+                    </div>
+                    <ul id="goalList" class="space-y-2">
+                        <!-- Goals will be dynamically added here -->
+                        <!-- Example Goal Item:
+                        <li class="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                            <div class="flex items-center">
+                                <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600 rounded mr-3">
+                                <span class="text-gray-700">Goal description</span>
+                            </div>
+                            <button class="text-red-500 hover:text-red-700">Delete</button>
+                        </li>
+                        -->
+                    </ul>
+                </section>
+            </div>
+
+            <!-- Right Column: Progress History -->
+            <div class="md:col-span-1 space-y-6">
+                <section id="progressHistory" class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-semibold mb-4 text-gray-700">Progress Overview</h2>
+                    <p class="text-gray-600 mb-2">Completed goals trend:</p>
+                    <div class="h-80">
+                        <canvas id="progressChart" class="w-full h-full"></canvas>
+                    </div>
+                    <div id="historyList" class="mt-4 text-sm text-gray-600">
+                        <!-- Progress history details can be listed here if needed -->
+                    </div>
+                </section>
+
+                <!-- Pomodoro Timer Section -->
+                <section id="pomodoroTimer" class="bg-white p-6 rounded-lg shadow-md mt-6">
+                    <h2 class="text-2xl font-semibold mb-4 text-gray-700">Pomodoro Timer</h2>
+                    <div id="timerDisplay" class="text-5xl font-bold text-center text-blue-600 mb-4">25:00</div>
+                    <div class="flex justify-center space-x-3">
+                        <button id="startPauseButton" class="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600">Start</button>
+                        <button id="resetButton" class="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600">Reset</button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+/* Custom styles can be added here if needed */
+body.dark-mode {
+    background-color: #1a202c; /* Equivalent to Tailwind's bg-gray-900 */
+    color: #e2e8f0; /* Equivalent to Tailwind's text-gray-200 */
+}
+
+body.dark-mode .bg-white {
+    background-color: #2d3748; /* Equivalent to Tailwind's bg-gray-800 */
+}
+
+body.dark-mode .text-gray-800 {
+    color: #e2e8f0; /* Equivalent to Tailwind's text-gray-200 */
+}
+
+body.dark-mode .text-gray-700 {
+    color: #a0aec0; /* Equivalent to Tailwind's text-gray-400 */
+}
+
+body.dark-mode .text-gray-600 {
+    color: #cbd5e0; /* Equivalent to Tailwind's text-gray-300 */
+}
+
+body.dark-mode .border-gray-300 {
+    border-color: #4a5568; /* Equivalent to Tailwind's border-gray-600 */
+}
+
+body.dark-mode #newGoalInput {
+    background-color: #4a5568; /* bg-gray-700 for dark inputs */
+    color: #e2e8f0; /* text-gray-200 */
+}
+
+body.dark-mode #newGoalInput::placeholder {
+    color: #a0aec0; /* text-gray-400 */
+}
+
+/* Style for completed goals */
+.completed span {
+    text-decoration: line-through;
+    color: #a0aec0; /* Lighter text for completed items */
+}
+
+body.dark-mode .completed span {
+    color: #718096; /* Even lighter for dark mode */
+}
+
+/* Dark mode for Pomodoro Timer Display */
+body.dark-mode #timerDisplay {
+    color: #90cdf4; /* Tailwind's blue-400, for better contrast in dark mode */
+}
