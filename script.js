@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const newGoalInput = document.getElementById('newGoalInput');
     const addGoalButton = document.getElementById('addGoalButton');
     const goalList = document.getElementById('goalList');
+    const goalPriority = document.getElementById('goalPriority');
+    const goalTag = document.getElementById('goalTag');
+    const goalDueTime = document.getElementById('goalDueTime');
     const quoteText = document.getElementById('quoteText');
     const quoteAuthor = document.getElementById('quoteAuthor');
     const darkModeToggle = document.getElementById('darkModeToggle');
@@ -10,11 +13,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const timerDisplay = document.getElementById('timerDisplay');
     const startPauseButton = document.getElementById('startPauseButton');
     const resetButton = document.getElementById('resetButton');
+    const workDurationInput = document.getElementById('workDurationInput');
+    const breakDurationInput = document.getElementById('breakDurationInput');
+    const applyTimerSettingsButton = document.getElementById('applyTimerSettings');
 
     let goals = [];
     let progressData = {
         labels: [], // Dates
-        completedCounts: [] // Number of goals completed on that date
+        completedCounts: [], // Number of goals completed on that date
+        totalCounts: [] // Number of goals tracked on that date
     };
     let chartInstance = null;
 
@@ -65,14 +72,25 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data && data.length > 0) {
                 quoteText.textContent = data[0].q;
                 quoteAuthor.textContent = `— ${data[0].a}`;
+                localStorage.setItem('devTrackerQuote', JSON.stringify({
+                    text: data[0].q,
+                    author: data[0].a,
+                    date: new Date().toISOString()
+                }));
             } else {
                 quoteText.textContent = "Keep pushing your limits.";
                 quoteAuthor.textContent = "— DevTracker";
             }
         } catch (error) {
             console.error("Failed to fetch quote:", error);
-            quoteText.textContent = "The best way to predict the future is to create it.";
-            quoteAuthor.textContent = "— Peter Drucker (Fallback)";
+            const cachedQuote = JSON.parse(localStorage.getItem('devTrackerQuote'));
+            if (cachedQuote?.text) {
+                quoteText.textContent = cachedQuote.text;
+                quoteAuthor.textContent = `— ${cachedQuote.author || 'DevTracker'}`;
+            } else {
+                quoteText.textContent = "The best way to predict the future is to create it.";
+                quoteAuthor.textContent = "— Peter Drucker (Fallback)";
+            }
         }
     };
 
@@ -103,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const goalContent = document.createElement('div');
-            goalContent.className = 'flex items-center';
+            goalContent.className = 'flex flex-col sm:flex-row sm:items-center gap-2';
 
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
@@ -115,8 +133,36 @@ document.addEventListener('DOMContentLoaded', () => {
             span.textContent = goal.text;
             span.className = `text-gray-700 dark:text-gray-300 ${goal.completed ? 'line-through' : ''}`;
 
-            goalContent.appendChild(checkbox);
-            goalContent.appendChild(span);
+            const meta = document.createElement('div');
+            meta.className = 'flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400';
+
+            const priorityBadge = document.createElement('span');
+            priorityBadge.className = `px-2 py-1 rounded-full ${goal.priority === 'high' ? 'bg-red-100 text-red-700' : goal.priority === 'low' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`;
+            priorityBadge.textContent = `${goal.priority.charAt(0).toUpperCase() + goal.priority.slice(1)} priority`;
+
+            const tagBadge = document.createElement('span');
+            tagBadge.className = 'px-2 py-1 rounded-full bg-blue-100 text-blue-700';
+            tagBadge.textContent = goal.tag || 'General';
+
+            const dueTimeBadge = document.createElement('span');
+            dueTimeBadge.className = 'px-2 py-1 rounded-full bg-gray-200 text-gray-700';
+            dueTimeBadge.textContent = goal.dueTime ? `Due ${goal.dueTime}` : 'No due time';
+
+            meta.appendChild(priorityBadge);
+            meta.appendChild(tagBadge);
+            meta.appendChild(dueTimeBadge);
+
+            const goalTextWrapper = document.createElement('div');
+            goalTextWrapper.className = 'flex flex-col';
+            goalTextWrapper.appendChild(span);
+            goalTextWrapper.appendChild(meta);
+
+            const checkboxWrapper = document.createElement('div');
+            checkboxWrapper.className = 'flex items-start';
+            checkboxWrapper.appendChild(checkbox);
+
+            goalContent.appendChild(checkboxWrapper);
+            goalContent.appendChild(goalTextWrapper);
 
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'Delete';
@@ -136,8 +182,17 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Please enter a goal description.');
             return;
         }
-        goals.push({ text: goalText, completed: false, dateAdded: new Date().toISOString().split('T')[0] });
+        goals.push({
+            text: goalText,
+            completed: false,
+            dateAdded: new Date().toISOString().split('T')[0],
+            priority: goalPriority.value,
+            tag: goalTag.value.trim() || 'General',
+            dueTime: goalDueTime.value || ''
+        });
         newGoalInput.value = ''; // Clear input
+        goalTag.value = '';
+        goalDueTime.value = '';
         saveGoals();
         renderGoals();
     };
@@ -172,10 +227,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!progressData.labels.includes(today)) {
             progressData.labels.push(today);
             progressData.completedCounts.push(0); // Initialize with 0 completed
+            progressData.totalCounts.push(0); // Initialize with 0 total
              // Keep data for last 7 days for example
             if (progressData.labels.length > 7) {
                 progressData.labels.shift();
                 progressData.completedCounts.shift();
+                progressData.totalCounts.shift();
             }
         }
     };
@@ -188,18 +245,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const today = new Date().toISOString().split('T')[0];
         const todayGoals = goals.filter(goal => goal.dateAdded === today || !goal.dateAdded); // Consider goals without dateAdded as today's
         const completedToday = todayGoals.filter(goal => goal.completed).length;
+        const totalToday = todayGoals.length;
 
         const todayIndex = progressData.labels.indexOf(today);
         if (todayIndex !== -1) {
             progressData.completedCounts[todayIndex] = completedToday;
+            progressData.totalCounts[todayIndex] = totalToday;
         } else {
             // This case should be handled by loadProgressData, but as a fallback:
             progressData.labels.push(today);
             progressData.completedCounts.push(completedToday);
+            progressData.totalCounts.push(totalToday);
             // Trim if too long
             if (progressData.labels.length > 7) {
                 progressData.labels.shift();
                 progressData.completedCounts.shift();
+                progressData.totalCounts.shift();
             }
         }
         saveProgressData();
@@ -222,6 +283,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     borderColor: 'rgba(54, 162, 235, 1)', // Blue line
                     borderWidth: 2,
                     tension: 0.1, // Makes the line slightly curved
+                    fill: true
+                }, {
+                    label: 'Total Goals',
+                    data: progressData.totalCounts,
+                    backgroundColor: 'rgba(148, 163, 184, 0.2)',
+                    borderColor: 'rgba(148, 163, 184, 1)',
+                    borderWidth: 2,
+                    tension: 0.1,
                     fill: true
                 }]
             },
@@ -255,9 +324,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let timerInterval = null;
     let timeLeft = 25 * 60; // 25 minutes in seconds
     let isPaused = true;
-    const workDuration = 25 * 60;
-    const breakDuration = 5 * 60;
+    let workDuration = 25 * 60;
+    let breakDuration = 5 * 60;
     let isWorkSession = true; // Start with a work session
+    const timerSettingsKey = 'devTrackerTimerSettings';
 
     const updateTimerDisplay = () => {
         const minutes = Math.floor(timeLeft / 60);
@@ -322,6 +392,40 @@ document.addEventListener('DOMContentLoaded', () => {
         resetTimer();
     });
 
+    const applyTimerSettings = (workMinutes, breakMinutes, shouldSave = true) => {
+        workDuration = workMinutes * 60;
+        breakDuration = breakMinutes * 60;
+        timeLeft = isWorkSession ? workDuration : breakDuration;
+        updateTimerDisplay();
+        if (shouldSave) {
+            localStorage.setItem(timerSettingsKey, JSON.stringify({
+                workMinutes,
+                breakMinutes
+            }));
+        }
+    };
+
+    const loadTimerSettings = () => {
+        const savedSettings = JSON.parse(localStorage.getItem(timerSettingsKey));
+        if (savedSettings?.workMinutes && savedSettings?.breakMinutes) {
+            workDurationInput.value = savedSettings.workMinutes;
+            breakDurationInput.value = savedSettings.breakMinutes;
+            applyTimerSettings(savedSettings.workMinutes, savedSettings.breakMinutes, false);
+        }
+    };
+
+    applyTimerSettingsButton.addEventListener('click', () => {
+        const workMinutes = Number(workDurationInput.value);
+        const breakMinutes = Number(breakDurationInput.value);
+        if (!workMinutes || !breakMinutes) {
+            alert('Please enter valid work and break durations.');
+            return;
+        }
+        pauseTimer();
+        isWorkSession = true;
+        applyTimerSettings(workMinutes, breakMinutes);
+    });
+
     // --- Initial Load ---
     const initializeApp = () => {
         loadDarkModePreference();
@@ -329,6 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadGoals(); // This will also call renderGoals
         loadProgressData(); // Load historical progress
         updateProgressForToday(); // Calculate today's progress and render chart
+        loadTimerSettings();
         updateTimerDisplay(); // Initialize Pomodoro display
     };
 

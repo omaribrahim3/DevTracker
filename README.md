@@ -5,9 +5,10 @@ DevTracker is a simple web application designed to help you track your daily cod
 ## Features
 
 *   **Goal Management:** Add, delete, and mark coding goals as complete.
+*   **Goal Metadata:** Track priority, tags, and due times for each goal.
 *   **Motivational Quotes:** Displays a new motivational quote each day to keep you inspired.
 *   **Progress Tracking:** Visualizes your completed goals over time with a chart.
-*   **Pomodoro Timer:** Includes a Pomodoro timer to help you focus and manage work/break sessions.
+*   **Pomodoro Timer:** Includes a configurable Pomodoro timer to help you focus and manage work/break sessions.
 *   **Dark Mode:** Toggle between light and dark themes for comfortable viewing.
 *   **Local Storage:** Saves your goals, progress, and dark mode preference in your browser's local storage.
 
@@ -63,6 +64,12 @@ To run DevTracker locally, follow these steps:
 ## Contributing
 
 Feel free to fork this project, make improvements, and submit pull requests!
+
+## Roadmap
+
+*   Weekly/monthly analytics and completion rate trends.
+*   Streaks and reminders for consistency.
+*   Optional cloud sync and export/import of goal data.
 
 --- 
 
